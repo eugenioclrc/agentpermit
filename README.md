@@ -9,7 +9,7 @@ The demo deliberately separates environments:
 - ENSv2 identity and endpoint permissions operate on Sepolia.
 - The previous paper ledger remains available and persists separately from live strategy state.
 
-This is a test-funds hackathon executor, not a profit promise. Delta neutrality does not remove funding, basis, range, liquidation, smart-contract or execution risk. Real Graph/OpenAI evidence and both Uniswap fork fee-tier checks are verified; Hyperliquid execution, the user-owned ENS flow, publication and the final recording remain pending.
+This is a test-funds hackathon executor, not a profit promise. Delta neutrality does not remove funding, basis, range, liquidation, smart-contract or execution risk. The verification results below are dated checkpoints, not proof that every external demo or submission requirement is complete. The ENSv2 end-to-end setup remains incomplete.
 
 ## Run the complete local demo
 
@@ -78,11 +78,27 @@ For the controlled recovery segment, set `REPLAY_INITIAL_HEDGE_RATIO=0.8` and `R
 
 Live state is `data/strategy-state.json`; the legacy paper ledger remains `data/state.json`. Both use temp-file write, `fsync`, rename and directory `fsync`.
 
+## Uniswap integration
+
+The integration uses official V3 contracts on an Ethereum mainnet fork, not a custom vault or a mainnet deployment. Execution is restricted to the loopback Anvil chain, ID `31337`, with fork block `25965916`.
+
+| Contract/token | Ethereum address used on the fork |
+| --- | --- |
+| Uniswap V3 Factory | `0x1F98431c8aD98523631AE4a59f267346ea31F984` |
+| NonfungiblePositionManager | `0xC36442b4a4522E871399CD717aBDD847Ab11FE88` |
+| SwapRouter | `0xE592427A0AEce92De3Edee1F18E0157C05861564` |
+| USDC | `0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48` |
+| WETH | `0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2` |
+
+Review the [contract constants](server/uniswap.ts#L13), [factory pool lookup and token/fee checks](server/uniswap.ts#L91), [SDK position sizing](server/uniswap.ts#L115), [SDK mint and receipt handling](server/uniswap.ts#L138), [LP amounts and uncollected fee reads](server/uniswap.ts#L153), and [liquidity removal, collection, NFT burn and WETH sale](server/uniswap.ts#L174).
+
+The [isolated fork check](scripts/check-fork.ts#L40) exercises both fee tiers from the same starting snapshot and asserts zero remaining WETH and a burned NFT. See [setup](docs/SETUP.md) before running it. [FEEDBACK.md](FEEDBACK.md) documents integration friction and suggested improvements; the separate [Uniswap Developer Feedback Form](https://developers.uniswap.org/hackathon-feedback) must include that file's public URL.
+
 ## ENSv2
 
 The admin registers/configures `delta.<team>.eth`, delegates only `agentpermit.endpoint` to the operator, and retains payout and protected records. The wallet-free client resolves the endpoint independently on Sepolia and displays the service's live strategy separately from the legacy paper ledger. ENS authenticates the pointer; it does not attest metrics or enforce financial limits.
 
-See [the environment manifest](docs/ENVIRONMENTS.md), [ENS feedback](docs/ENS-FEEDBACK.md), [Uniswap feedback](FEEDBACK.md), and [three-minute demo](docs/DEMO.md).
+This optional integration is implemented in the source, but its user-owned subname, endpoint delegation and independent-client flow were not completed for the demonstrated submission. It is not claimed as a verified sponsor integration.
 
 ## Validation
 
@@ -97,11 +113,11 @@ npm run evidence:export # whitelist public evidence from existing local files
 
 Tests cover LP/perp exposure including pending fees and free WETH, partial fills, $12 re-hedging, 60-second range exit, idempotent actions, timeout/restart reconciliation without duplicate orders, three-failure unwind, HTTP session/origin boundaries, the legacy paper ledger and ENS endpoint recovery.
 
-Verified on 2026-09-13: `npm run check` passed 33 tests and the production build; browser fixtures passed. The isolated contract check passed mint/read/remove/collect/NFT burn/WETH sale at block 25965916 for fees 500 and 3000, with zero remaining WETH. The latest real Graph/OpenAI capture is `0de9b168-62a2-4b13-8d62-55ef093a3aa2`, indexed block 25966246, model `gpt-5-nano`, recommendation `open`, fee 500.
+Verified on 2026-09-13: `npm run check` passed 33 tests and the production build; browser fixtures passed. The isolated contract check passed mint/read/remove/collect/NFT burn/WETH sale at block 25965916 for fees 500 and 3000, with zero remaining WETH. One historical Graph/OpenAI capture is `0de9b168-62a2-4b13-8d62-55ef093a3aa2`, indexed block 25966246, model `gpt-5-nano`, recommendation `open`, fee 500.
 
-The [public bundle](docs/evidence/demo.json) separates that analytics capture from the saved execution proposal and independent fork check. Select an actual capture with `npm run evidence:export -- --proposal <UUID>`; this does not alter the strategy ledger. Hyperliquid order evidence and user-owned ENS receipts remain missing. Current limitations and submission requirements are in [validation status](docs/VALIDATION.md) and [the submission checklist](docs/SUBMISSION.md).
+Generate a local evidence bundle with `npm run evidence:export -- --proposal <UUID>`, selecting an actual saved capture; this does not alter the strategy ledger. The generated `docs/evidence/demo.json` distinguishes analytics captures, strategy ledger records and independent fork checks. Review it before sharing; raw `data/` and credentials stay private. These dated tests do not establish a complete live recovery demo or the unfinished ENS flow.
 
-Integration entry points: [Graph and AI proposal](server/proposal.ts#L152), [Uniswap SDK mint](server/uniswap.ts#L138), [Uniswap close/burn/sale](server/uniswap.ts#L174), [Hyperliquid testnet executor](server/hyperliquid.ts), and [ENSv2 resolver permissions](shared/ens.ts). Fixed contract addresses are in [the environment manifest](docs/ENVIRONMENTS.md).
+Integration entry points: [Graph and AI proposal](server/proposal.ts#L152), [Uniswap SDK mint](server/uniswap.ts#L138), [Uniswap close/burn/sale](server/uniswap.ts#L174), [Hyperliquid testnet executor](server/hyperliquid.ts), and [ENSv2 resolver permissions](shared/ens.ts). Fixed Uniswap addresses and lifecycle links are listed in [Uniswap integration](#uniswap-integration).
 
 ## Fixed contracts and sources
 
