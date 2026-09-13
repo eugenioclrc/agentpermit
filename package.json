@@ -1,0 +1,40 @@
+{
+  "name": "agentpermit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.7.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "agent": "node --env-file-if-exists=.env server/main.ts",
+    "fork": "node --env-file-if-exists=.env scripts/start-fork.ts",
+    "fund:fork": "node --env-file-if-exists=.env scripts/fund-fork.ts",
+    "keygen": "node scripts/keygen.ts",
+    "test": "node --test test/*.test.ts",
+    "check": "tsc --noEmit && npm test && vite build",
+    "check:ens": "node --env-file-if-exists=.env scripts/check-ens.ts",
+    "check:fork": "node --env-file-if-exists=.env scripts/check-fork.ts",
+    "doctor": "node --env-file-if-exists=.env scripts/doctor.ts",
+    "evidence:export": "node scripts/export-evidence.ts",
+    "test:browser": "node scripts/browser-smoke.ts",
+    "preview": "vite preview --host 127.0.0.1 --port 5173 --strictPort"
+  },
+  "dependencies": {
+    "@nktkas/hyperliquid": "^0.33.3",
+    "@uniswap/sdk-core": "^3.2.6",
+    "@uniswap/v3-sdk": "^3.8.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "viem": "2.56.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "playwright": "1.63.0",
+    "typescript": "7.0.2",
+    "vite": "8.2.2"
+  }
+}
